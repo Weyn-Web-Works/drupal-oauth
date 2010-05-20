@@ -1,4 +1,0 @@
-; $Id$
-core            = "6.x"
-description     = "A generic client that might be used by developers that want to integrate their modules with OAuth."
-name            = "OAuth Client Test"

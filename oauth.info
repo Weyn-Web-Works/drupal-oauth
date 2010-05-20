@@ -1,4 +1,0 @@
-; $Id$
-core            = "6.x"
-description     = "Enable the world wide standard OAuth for authentication."
-name            = "OAuth"
