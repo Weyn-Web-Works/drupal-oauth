@@ -1,4 +1,3 @@
-// $Id$
 
 A best practices implementation of OAuth for Drupal.  
 
