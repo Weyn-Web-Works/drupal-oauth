@@ -10,4 +10,6 @@ correctly.
 
 Installation
 ============
-This module uses the PECL OAuth package, located at http://pecl.php.net/package/oauth.
+1. Download and install the Libraries API module from http://drupal.org/project/libraries
+2. Download the OAuth library from https://github.com/juampy72/OAuth-PHP at
+sites/all/modules/libraries/oauth/OAuth.php

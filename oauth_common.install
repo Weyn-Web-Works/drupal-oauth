@@ -36,8 +36,9 @@ function oauth_common_requirements($phase) {
     if (!file_exists($library)) {
       $requirements['oauth_lib']['value'] = $t('Missing');
       $requirements['oauth_lib']['description'] = $t('You must download it from ' .
-        '<a href="http://oauth.googlecode.com/svn/code/php" target="_blank">Google Code</a> ' .
-        'and place it at !library', array('!library' => $library));
+        '<a href="https://github.com/juampy72/OAuth-PHP" target="_blank">Github</a> ' .
+        'at https://github.com/juampy72/OAuth-PHP and place it at !library',
+        array('!library' => $library));
       $requirements['oauth_lib']['severity'] = REQUIREMENT_ERROR;
     } else {
       $requirements['oauth_lib']['value'] = $t('Installed');
