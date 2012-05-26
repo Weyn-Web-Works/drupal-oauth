@@ -1,8 +1,8 @@
-OAuth 7.x-3.1, 2012--
+OAuth 7.x-4.0, 2012--
 ------------------------------
 #1529166 by barraponto: implement hook_requirements() to check that cURL library is available.
 #1535764 by bojanz: Signature selection in includes/DrupalOAuthServer.inc is broken.
-#1092270 by jobeirne, steinmb and juampy: Decouple OAuth code from Drupal module via Libraries API.
+#1092270 by jobeirne, steinmb, kotnik and juampy: Decouple OAuth code from Drupal module via Libraries API.
 
 OAuth 7.x-3.0, 2012-2-8
 ------------------------------
