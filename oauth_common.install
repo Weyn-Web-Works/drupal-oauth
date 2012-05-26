@@ -26,23 +26,25 @@ function oauth_common_requirements($phase) {
     );
   }
 
-  // Check that OAuth library has been placed at the libraries directory
-  if (!module_exists('libraries')) {
-    module_enable(array('libraries'));
-  }
-  if ($path = libraries_get_path('oauth')) {
-    $library = $path . '/OAuth.php';
-    $requirements['oauth_lib'] = array('title' => $t('OAuth library'));
-    if (!file_exists($library)) {
-      $requirements['oauth_lib']['value'] = $t('Missing');
-      $requirements['oauth_lib']['description'] = $t('You must download it from ' .
-        '<a href="https://github.com/juampy72/OAuth-PHP" target="_blank">Github</a> ' .
-        'at https://github.com/juampy72/OAuth-PHP and place it at !library',
-        array('!library' => $library));
-      $requirements['oauth_lib']['severity'] = REQUIREMENT_ERROR;
-    } else {
-      $requirements['oauth_lib']['value'] = $t('Installed');
-      $requirements['oauth_lib']['severity'] = REQUIREMENT_OK;
+  if ($phase == 'runtime') {
+    // Check that OAuth library has been placed at the libraries directory
+    if (!module_exists('libraries')) {
+      module_enable(array('libraries'));
+    }
+    if ($path = libraries_get_path('oauth')) {
+      $library = $path . '/OAuth.php';
+      $requirements['oauth_lib'] = array('title' => $t('OAuth library'));
+      if (!file_exists($library)) {
+        $requirements['oauth_lib']['value'] = $t('Missing');
+        $requirements['oauth_lib']['description'] = $t('You must download it from ' .
+          '<a href="https://github.com/juampy72/OAuth-PHP" target="_blank">Github</a> ' .
+          'at https://github.com/juampy72/OAuth-PHP and place it at !library',
+          array('!library' => $library));
+        $requirements['oauth_lib']['severity'] = REQUIREMENT_ERROR;
+      } else {
+        $requirements['oauth_lib']['value'] = $t('Installed');
+        $requirements['oauth_lib']['severity'] = REQUIREMENT_OK;
+      }
     }
   }
 
