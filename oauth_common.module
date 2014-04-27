@@ -172,16 +172,20 @@ function oauth_common_provider_token_load($tid) {
  * Implementation of hook_cron().
  */
 function oauth_common_cron() {
-  db_query("DELETE t, pt FROM {oauth_common_token} t LEFT JOIN {oauth_common_provider_token} pt ON pt.tid = t.tid
-    WHERE t.expires != 0 AND t.expires <= %d", array(
-      ':now' => time(),
-  ));
+  $now = time();
 
-  // Should 300 be overriden in DrupalOAuthServer and made configurable?
+  db_query("DELETE FROM {oauth_common_provider_token} WHERE tid IN
+    (SELECT tid FROM {oauth_common_token}
+    WHERE expires != 0 AND expires <= %d)", $now
+  );
+
+  db_query("DELETE FROM {oauth_common_token}
+    WHERE expires != 0 AND expires <= %d", $now
+  );
+
   db_query("DELETE FROM {oauth_common_nonce}
-    WHERE `timestamp` < %d", array(
-      ':now' => time() - 300,
-  ));
+    WHERE timestamp < %d", $now - 300
+  );
 }
 
 /**
