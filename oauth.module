@@ -47,27 +47,6 @@ function oauth_permission() {
 function oauth_menu() {
   $menu = array();
 
-  $admin_base = array(
-    'access arguments' => array('administer oauth'),
-    'file' => 'oauth.admin.inc',
-  );
-
-  $menu['admin/config/services/oauth'] = array(
-    'title' => 'OAuth',
-    'description' => 'Settings for OAuth',
-    'route_name' => 'oauth.admin_form',
-    'type' => MENU_NORMAL_ITEM,
-  );
-
-  $menu['admin/config/services/oauth/settings'] = array(
-    'title' => 'Settings',
-    'description' => 'Settings for OAuth',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_oauth_admin'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 0,
-  ) + $admin_base;
-
   // OAuth doesn't need different endpoints for the different context as all
   // actions are done with a specific consumer, which in itself is associated
   // with a context.
@@ -118,18 +97,6 @@ function oauth_menu() {
     'file' => 'oauth.pages.inc',
     'page callback' => '_oauth_validate_request_callback',
     'page arguments' => array('access token'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $menu['user/%user/oauth/consumer'] = array(
-    'title' => 'OAuth Consumers',
-    'route_name' => 'oauth.user_consumer',
-    'type' => MENU_LOCAL_TASK,
-  );
-
-  $menu['user/%user/oauth/consumer/add'] = array(
-    'title' => 'Add an OAuth Consumer',
-    'route_name' => 'oauth.user_consumer_add',
     'type' => MENU_CALLBACK,
   );
 
