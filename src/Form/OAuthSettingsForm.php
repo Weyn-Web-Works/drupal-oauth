@@ -9,7 +9,6 @@ namespace Drupal\oauth\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\Core\Config\Context\ContextInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -21,8 +20,8 @@ class OAuthSettingsForm extends ConfigFormBase {
   /**
    * Constructs an OAuthSettingsForm object.
    */
-  public function __construct(ConfigFactory $config_factory, ContextInterface $context){
-    parent::__construct($config_factory, $context);
+  public function __construct(ConfigFactory $config_factory){
+    parent::__construct($config_factory);
   }
 
 
@@ -31,8 +30,7 @@ class OAuthSettingsForm extends ConfigFormBase {
    */
   public static function create (ContainerInterface $container){
     return new static(
-      $container->get('config.factory'),
-      $container->get('config.context.free')
+      $container->get('config.factory')
     );
   }
 
@@ -77,7 +75,7 @@ class OAuthSettingsForm extends ConfigFormBase {
     parent::validateForm($form, $form_state);
 
     if (!intval($form_state['values']['request_token_lifetime'], 10)) {
-      form_set_error('oauth_request_token_lifetime', t('The request token lifetime must be a non-zero integer value.'));
+      \Drupal::formBuilder()->setErrorByName('oauth_request_token_lifetime', $form_state, t('The request token lifetime must be a non-zero integer value.'));
     }
   }
 
