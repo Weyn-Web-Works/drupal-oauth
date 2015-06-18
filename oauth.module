@@ -16,32 +16,6 @@ define('OAUTH_COMMON_LOGIN_PATH', 'user/login');
 //TODO: Move provider ui related pages to provider ui
 
 /**
- * Implements hook_permission().
- */
-function oauth_permission() {
-  $permissions = array(
-    'access own consumers' => array(
-      'title' => t('Access own OAuth consumers'),
-      'restrict access' => TRUE,
-    ),
-    'oauth register any consumers' => array(
-      'title' => t('Register any OAuth consumers'),
-      'restrict access' => TRUE,
-    ),
-    'administer oauth' => array(
-      'title' => t('Administer OAuth'),
-      'restrict access' => TRUE,
-    ),
-    'administer consumers' => array(
-      'title' => t('Administer OAuth consumers'),
-      'restrict access' => TRUE,
-    ),
-  );
-
-  return $permissions;
-}
-
-/**
  * Implements hook_menu().
  */
 function oauth_menu() {
