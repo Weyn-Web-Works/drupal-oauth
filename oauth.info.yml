@@ -3,4 +3,4 @@ type: module
 description: "Provides OAuth 1.0a server authentication"
 package: Web services
 core: 8.x
-configure: admin/config/services/oauth
+configure: oauth.admin_form
