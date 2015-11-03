@@ -11,6 +11,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Path\AliasManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a deletion confirmation form for the block instance deletion form.
@@ -24,6 +25,14 @@ class OAuthSettingsForm extends ConfigFormBase {
     parent::__construct($config_factory);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return [
+      'oauth.settings',
+    ];
+  }
 
   /**
    * {@inheritdoc}
@@ -44,7 +53,7 @@ class OAuthSettingsForm extends ConfigFormBase {
   /**
    * Form builder.
    */
-  public function buildForm(array $form, array &$form_state){
+  public function buildForm(array $form, FormStateInterface $form_state) {
 
     $config = $this->configFactory->get('oauth.settings');
 
@@ -71,7 +80,7 @@ class OAuthSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
     if (!intval($form_state['values']['request_token_lifetime'], 10)) {
@@ -82,13 +91,12 @@ class OAuthSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-
-    $config = $this->configFactory->get('oauth.settings')
+    \Drupal::configFactory()->getEditable('oauth.settings')
       ->set('request_token_lifetime',$form_state['values']['request_token_lifetime'])
       ->set('login_path',$form_state['values']['login_path'])
-    ->save();
+      ->save();
   }
 
 }

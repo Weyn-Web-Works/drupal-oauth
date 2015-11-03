@@ -2,4 +2,4 @@ services:
   authentication.oauth:
     class: Drupal\oauth\Authentication\Provider\OAuthDrupalProvider
     tags:
-      - { name: authentication_provider, priority: 100 }
+      - { name: authentication_provider, provider_id: oauth, priority: 100 }
