@@ -12,8 +12,6 @@ define('OAUTH_COMMON_VERSION_1_RFC', 2); // The RFC 5849 1.0 spec
 define('OAUTH_COMMON_LOGIN_PATH', 'user/login');
 //TODO: Don't act as a provider by default.
 //TODO: Check for other functions with breaking changes
-//TODO: Add watchdog messages about deprecated methods?
-//TODO: Move provider ui related pages to provider ui
 
 /**
  * Implements hook_menu().
