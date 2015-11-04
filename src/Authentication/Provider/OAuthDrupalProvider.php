@@ -8,10 +8,10 @@
 namespace Drupal\oauth\Authentication\Provider;
 
 use Drupal\Core\Authentication\AuthenticationProviderInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
+use Drupal\Core\Database\Connection;
+use Drupal\user\Entity\User;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use \OauthProvider;
 use \OauthException;
@@ -21,12 +21,37 @@ use \OauthException;
  */
 class OAuthDrupalProvider implements AuthenticationProviderInterface {
 
+ /**
+   * The database service.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $connection;
+
+  /**
+   * The logger service for OAuth.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
   /**
    * An authenticated user object.
    *
    * @var \Drupal\user\UserBCDecorator
    */
   protected $user;
+
+  /**
+   * Constructor.
+   *
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger service for OAuth.
+   */
+  public function __construct(Connection $connection, LoggerInterface $logger) {
+    $this->connection = $connection;
+    $this->logger = $logger;
+  }
 
   /**
    * {@inheritdoc}
@@ -43,17 +68,18 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
     try {
       // Initialize and configure the OauthProvider too handle the request.
       $this->provider = new OAuthProvider();
-      $this->provider->consumerHandler(array($this,'lookupConsumer'));
-      $this->provider->timestampNonceHandler(array($this,'timestampNonceChecker'));
-      $this->provider->tokenHandler(array($this,'tokenHandler'));
+      $this->provider->consumerHandler(array($this, 'lookupConsumer'));
+      $this->provider->timestampNonceHandler(array($this, 'timestampNonceChecker'));
+      $this->provider->tokenHandler(array($this, 'tokenHandler'));
       $this->provider->is2LeggedEndpoint(TRUE);
 
       // Now check the request validity.
       $this->provider->checkOAuthRequest();
-    } catch (OAuthException $e) {
+    }
+    catch (OAuthException $e) {
       // The OAuth extension throws an alert when there is something wrong
       // with the request (ie. the consumer key is invalid).
-      watchdog('oauth', $e->getMessage(), array(), WATCHDOG_WARNING);
+      $this->logger->warning($e->getMessage());
       return NULL;
     }
 
@@ -82,19 +108,19 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
    * For the moment it handles two legged authentication for a pair of
    * dummy key and secret, 'a' and 'b' respectively.
    *
-   * @param \OAuthProvider
+   * @param \OAuthProvider $provider
    *   An instance of OauthProvider with the authorization request headers.
-   * @return
-   *   constant OAUTH_OK if the authentication was successfull.
-   *   OAUTH_CONSUMER_KEY_UNKNOWN if not.
+   * @return int
+   *   - OAUTH_OK if the authentication was successful.
+   *   - OAUTH_CONSUMER_KEY_UNKNOWN if not.
    * @see http://www.php.net/manual/en/class.oauthprovider.php
    */
-  public function lookupConsumer($provider) {
-    $row = db_query('select * from {oauth_consumer} where consumer_key = :consumer_key',
-                    array(':consumer_key' => $provider->consumer_key))->fetchObject();
+  public function lookupConsumer(OAuthProvider $provider) {
+    $row = $this->connection->query('select * from {oauth_consumer} where consumer_key = :consumer_key',
+             array(':consumer_key' => $provider->consumer_key))->fetchObject();
     if (!empty($row)) {
       $provider->consumer_secret = $row->consumer_secret;
-      $this->user = user_load($row->uid);
+      $this->user = User::load($row->uid);
       return OAUTH_OK;
     }
     else {
@@ -119,4 +145,5 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
   public function timestampNonceChecker($provider) {
     return OAUTH_OK;
   }
+
 }

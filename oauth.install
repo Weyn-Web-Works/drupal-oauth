@@ -53,7 +53,7 @@ function oauth_schema() {
         'length'      => 40,
         'not null'    => TRUE,
       ),
-      // Key is a reserved word in MySQL so lets avoid that
+      // Key is a reserved word in MySQL so let's avoid that
       'consumer_key' => array(
         'description' => 'Consumer key.',
         'type'        => 'text',
@@ -68,7 +68,7 @@ function oauth_schema() {
     'primary key' => array('cid'),
     'indexes' => array(
       'key_hash' => array('key_hash'),
-       'uid' => array('uid'),
+      'uid' => array('uid'),
     ),
     'foreign keys' => array(
       'users' => array(

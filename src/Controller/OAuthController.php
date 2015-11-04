@@ -7,27 +7,57 @@
 
 namespace Drupal\oauth\Controller;
 
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Url;
+use Drupal\Core\Utility\LinkGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\user\UserInterface;
 use Drupal\oauth\Form\OAuthDeleteConsumerForm;
 
 /**
- * Controller routines for book routes.
+ * Controller routines for oauth routes.
  */
 class OAuthController implements ContainerInjectionInterface {
 
   /**
-   * Constructs a BookController object.
+   * The database service.
+   *
+   * @var \Drupal\Core\Database\Connection
    */
-  public function __construct() {
+  protected $connection;
+
+  /**
+   * The URL generator service.
+   *
+   * @var \Drupal\Core\Utility\LinkGeneratorInterface
+   */
+  protected $linkGenerator;
+
+  /**
+   * Constructs an OauthController object.
+   *
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The database service.
+   * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
+   *   The link generator service.
+   */
+  public function __construct(Connection $connection, LinkGeneratorInterface $link_generator) {
+    $this->connection = $connection;
+    $this->linkGenerator = $link_generator;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static();
+    /** @var \Drupal\Core\Database\Connection $connection */
+    $connection = $container->get('database');
+
+    /** @var \Drupal\Core\Utility\LinkGeneratorInterface $link_generator */
+    $link_generator = $container->get('link_generator');
+
+    return new static($connection, $link_generator);
   }
 
   /**
@@ -40,15 +70,12 @@ class OAuthController implements ContainerInjectionInterface {
    *   A HTML-formatted string with the list of OAuth consumers.
    */
   public function consumers(UserInterface $user) {
-    $request = \Drupal::request();
     $list = array();
 
-    $list['heading']['#markup'] = l(t('Add consumer'), 'oauth/consumer/add');
+    $list['heading']['#markup'] = $this->linkGenerator->generate(t('Add consumer'), Url::fromRoute('oauth.user_consumer_add'));
 
     // Get the list of consumers.
-    $result = db_query('select *
-                        from {oauth_consumer}
-                        where uid = :uid', array(':uid' => $user->id()));
+    $result = $this->connection->query('select * from {oauth_consumer} where uid = :uid', array(':uid' => $user->id()));
 
     // Define table headers.
     $list['table'] = array(
@@ -79,7 +106,7 @@ class OAuthController implements ContainerInjectionInterface {
               '#links' => array(
                 'delete' => array(
                   'title' => t('Delete'),
-                  'href' => 'oauth/consumer/delete/' . $row->cid,
+                  'url' => Url::fromRoute('oauth.user_consumer_delete', array('cid' => $row->cid)),
                 ),
               ),
             ),

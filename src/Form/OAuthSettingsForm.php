@@ -8,10 +8,9 @@
 namespace Drupal\oauth\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
-use Drupal\Core\Config\ConfigFactory;
-use Drupal\Core\Path\AliasManagerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Config\ConfigFactory;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a deletion confirmation form for the block instance deletion form.
@@ -19,9 +18,21 @@ use Drupal\Core\Form\FormStateInterface;
 class OAuthSettingsForm extends ConfigFormBase {
 
   /**
-   * Constructs an OAuthSettingsForm object.
+   * {@inheritdoc}
    */
-  public function __construct(ConfigFactory $config_factory){
+  public static function create(ContainerInterface $container) {
+    /** @var \Drupal\Core\Config\ConfigFactory $config */
+    $config = $container->get('config.factory');
+    return new static($config);
+  }
+
+  /**
+   * Constructs an OAuthSettingsForm object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *   The config service.
+   */
+  public function __construct(ConfigFactory $config_factory) {
     parent::__construct($config_factory);
   }
 
@@ -37,21 +48,12 @@ class OAuthSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public static function create (ContainerInterface $container){
-    return new static(
-      $container->get('config.factory')
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFormID() {
+  public function getFormId() {
     return 'oauth_admin_form';
   }
 
   /**
-   * Form builder.
+   * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
@@ -83,8 +85,8 @@ class OAuthSettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
-    if (!intval($form_state['values']['request_token_lifetime'], 10)) {
-      \Drupal::formBuilder()->setErrorByName('oauth_request_token_lifetime', $form_state, t('The request token lifetime must be a non-zero integer value.'));
+    if (!intval($form_state->getValue('request_token_lifetime', 10))) {
+      $form_state->setErrorByName('oauth_request_token_lifetime', $this->t('The request token lifetime must be a non-zero integer value.'));
     }
   }
 
@@ -93,9 +95,10 @@ class OAuthSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
+
     \Drupal::configFactory()->getEditable('oauth.settings')
-      ->set('request_token_lifetime',$form_state['values']['request_token_lifetime'])
-      ->set('login_path',$form_state['values']['login_path'])
+      ->set('request_token_lifetime', $form_state->getValue('request_token_lifetime'))
+      ->set('login_path', $form_state->getValue('login_path'))
       ->save();
   }
 

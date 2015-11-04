@@ -107,7 +107,7 @@ function oauth_provider_token_load($tid) {
  * Implements hook_cron().
  */
 function oauth_cron() {
-  $token_condition = db_and()->condition('expires', 0, '<>')->condition('expires', REQUEST_TIME, '<=');
+  /*$token_condition = db_and()->condition('expires', 0, '<>')->condition('expires', REQUEST_TIME, '<=');
 
   db_delete('oauth_provider_token')
     ->condition('tid', db_select('oauth_token', 't')->condition($token_condition)->fields('t', array('tid')), 'IN')
@@ -120,7 +120,7 @@ function oauth_cron() {
   // Should 300 be overriden in DrupalOAuthServer and made configurable?
   db_delete('oauth_nonce')
     ->condition('timestamp', REQUEST_TIME - 300, '<')
-    ->execute();
+    ->execute();*/
 }
 
 /**
