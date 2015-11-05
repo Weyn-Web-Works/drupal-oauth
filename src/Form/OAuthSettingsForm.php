@@ -63,14 +63,14 @@ class OAuthSettingsForm extends ConfigFormBase {
 
     $form['request_token_lifetime'] = array(
       '#type' => 'textfield',
-      '#title' => t('Request token lifetime (in seconds)'),
+      '#title' => $this->t('Request token lifetime (in seconds)'),
       '#default_value' => $config->get('request_token_lifetime'),
     );
 
     $form['login_path'] = array(
       '#type' => 'textfield',
-      '#title' => t('Login page'),
-      '#description' => t('Specify an alternative login page. This is useful when, for example, you want to show a mobile-enhanced login page.'),
+      '#title' => $this->t('Login page'),
+      '#description' => $this->t('Specify an alternative login page. This is useful when, for example, you want to show a mobile-enhanced login page.'),
       '#default_value' => $config->get('login_path'),
     );
 

@@ -118,7 +118,7 @@ class OAuthDeleteConsumerForm extends ConfirmFormBase implements ContainerInject
     $this->connection->delete('oauth_consumer')
       ->condition('cid', $cid)
       ->execute();
-    drupal_set_message('OAuth consumer deleted.');
+    drupal_set_message($this->t('OAuth consumer deleted.'));
     $form_state->setRedirect('oauth.user_consumer', ['user' => \Drupal::currentUser()->id()]);
   }
 

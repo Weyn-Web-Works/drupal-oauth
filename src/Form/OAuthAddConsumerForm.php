@@ -94,7 +94,7 @@ class OAuthAddConsumerForm extends FormBase {
       ))
       ->execute();
 
-    drupal_set_message(t('Added a new consumer.'));
+    drupal_set_message($this->t('Added a new consumer.'));
     $form_state->setRedirect('oauth.user_consumer', array('user' => \Drupal::currentUser()->id()));
   }
 

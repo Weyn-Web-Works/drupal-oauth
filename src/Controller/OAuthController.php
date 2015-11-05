@@ -7,6 +7,7 @@
 
 namespace Drupal\oauth\Controller;
 
+use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\LinkGeneratorInterface;
@@ -18,7 +19,7 @@ use Drupal\oauth\Form\OAuthDeleteConsumerForm;
 /**
  * Controller routines for oauth routes.
  */
-class OAuthController implements ContainerInjectionInterface {
+class OAuthController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
    * The database service.
@@ -72,7 +73,7 @@ class OAuthController implements ContainerInjectionInterface {
   public function consumers(UserInterface $user) {
     $list = array();
 
-    $list['heading']['#markup'] = $this->linkGenerator->generate(t('Add consumer'), Url::fromRoute('oauth.user_consumer_add'));
+    $list['heading']['#markup'] = $this->linkGenerator->generate($this->t('Add consumer'), Url::fromRoute('oauth.user_consumer_add'));
 
     // Get the list of consumers.
     $result = $this->connection->query('select * from {oauth_consumer} where uid = :uid', array(':uid' => $user->id()));
@@ -82,13 +83,13 @@ class OAuthController implements ContainerInjectionInterface {
       '#theme' => 'table',
       '#header' => array(
         'consumer_key' => array(
-          'data' => t('Consumer key'),
+          'data' => $this->t('Consumer key'),
         ),
         'consumer_secret' => array(
-          'data' => t('Consumer secret'),
+          'data' => $this->t('Consumer secret'),
         ),
         'operations' => array(
-          'data' => t('Operations'),
+          'data' => $this->t('Operations'),
         ),
       ),
       '#rows' => array(),
@@ -105,7 +106,7 @@ class OAuthController implements ContainerInjectionInterface {
               '#type' => 'operations',
               '#links' => array(
                 'delete' => array(
-                  'title' => t('Delete'),
+                  'title' => $this->t('Delete'),
                   'url' => Url::fromRoute('oauth.user_consumer_delete', array('cid' => $row->cid)),
                 ),
               ),
@@ -115,7 +116,7 @@ class OAuthController implements ContainerInjectionInterface {
       );
     }
 
-    $list['table']['#empty'] = t('There are no OAuth consumers.');
+    $list['table']['#empty'] = $this->t('There are no OAuth consumers.');
 
     return $list;
   }
