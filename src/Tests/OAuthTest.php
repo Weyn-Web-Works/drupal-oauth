@@ -111,4 +111,26 @@ class OAuthTest extends WebTestBase {
     $this->curlClose();
   }
 
+  /**
+   * Tests automatic consumer deletion.
+   */
+  function testConsumerDeletion() {
+    // Create a user with permissions to manage its own consumers.
+    $permissions = array('access own consumers');
+    $account = $this->drupalCreateUser($permissions);
+
+    // Initiate user session.
+    $this->drupalLogin($account);
+
+    // Generate a set of consumer keys.
+    $this->drupalPostForm('oauth/consumer/add', array(), 'Add');
+
+    // Delete the user.
+    $uid = $account->id();
+    $account->delete();
+    // Check that its consumers were deleted.
+    $consumer = db_query('select cid FROM {oauth_consumer} WHERE uid = :uid', array(':uid' => $uid))->fetchField();
+    $this->assertFalse($consumer, t('Consumer keys were deleted on user deletion.'));
+  }
+
 }
