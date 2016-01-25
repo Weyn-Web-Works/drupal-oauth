@@ -1,11 +1,8 @@
 <?php
-
 /**
  * @file
  * Installation and schema related functions for the OAuth module.
  */
-
-use Drupal\Core\Database\Database;
 
 /**
  * Implements hook_requirements().
@@ -31,19 +28,55 @@ function oauth_requirements($phase) {
 }
 
 /**
- * Move any existing oauth data to UserData and remove 'oauth_consumers' table.
+ * Implements hook_schema().
  */
-function oauth_update_8100(&$sandbox) {
-  // Fetch any current consumer data.
-  $result = Database::getConnection()->query('select * from {oauth_consumer}');
-  $user_data =  \Drupal::service('user.data');
-  foreach($result as $row) {
-    // Insert each row in to Userdata.
-    $user_data->set('oauth', $row->uid, $row->consumer_key, [
-      'consumer_secret' => $row->consumer_secret,
-      'key_hash' => $row->key_hash,
-    ]);
-  }
-  // Remove the oauth_consumer table.
-  Database::getConnection()->schema()->dropTable('oauth_consumer');
+function oauth_schema() {
+  $schema = array();
+
+  $schema['oauth_consumer'] = array(
+    'description' => 'Keys and secrets for OAuth consumers, both those provided by this site and other sites.',
+    'fields' => array(
+      'cid' => array(
+        'type'        => 'serial',
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'not null'    => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The application owner.',
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+      ),
+      'key_hash' => array(
+        'description' => 'SHA1-hash of consumer_key.',
+        'type'        => 'char',
+        'length'      => 40,
+        'not null'    => TRUE,
+      ),
+      // Key is a reserved word in MySQL so let's avoid that
+      'consumer_key' => array(
+        'description' => 'Consumer key.',
+        'type'        => 'text',
+        'not null'    => TRUE,
+      ),
+      'consumer_secret' => array(
+        'description' => 'Consumer secret.',
+        'type'        => 'text',
+        'not null'    => TRUE,
+      ),
+    ),
+    'primary key' => array('cid'),
+    'indexes' => array(
+      'key_hash' => array('key_hash'),
+      'uid' => array('uid'),
+    ),
+    'foreign keys' => array(
+      'users' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
+  );
+
+  return $schema;
 }

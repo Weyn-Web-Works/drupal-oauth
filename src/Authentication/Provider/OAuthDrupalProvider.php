@@ -8,24 +8,25 @@
 namespace Drupal\oauth\Authentication\Provider;
 
 use Drupal\Core\Authentication\AuthenticationProviderInterface;
+use Drupal\Core\Database\Connection;
 use Drupal\user\Entity\User;
-use Drupal\user\UserDataInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use \OauthProvider;
 use \OauthException;
+
 /**
  * Oauth authentication provider.
  */
 class OAuthDrupalProvider implements AuthenticationProviderInterface {
 
  /**
-   * The user data service.
+   * The database service.
    *
-   * @var \Drupal\user\UserDataInterface
+   * @var \Drupal\Core\Database\Connection
    */
-  protected $user_data;
+  protected $connection;
 
   /**
    * The logger service for OAuth.
@@ -44,13 +45,11 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
   /**
    * Constructor.
    *
-   * @param \Drupal\user\UserDataInterface
-   *  The user data service.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger service for OAuth.
    */
-  public function __construct(UserDataInterface $user_data, LoggerInterface $logger) {
-    $this->user_data = $user_data;
+  public function __construct(Connection $connection, LoggerInterface $logger) {
+    $this->connection = $connection;
     $this->logger = $logger;
   }
 
@@ -117,10 +116,11 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
    * @see http://www.php.net/manual/en/class.oauthprovider.php
    */
   public function lookupConsumer(OAuthProvider $provider) {
-    $user_data = $this->user_data->get('oauth', NULL, $provider->consumer_key);
-    if (!empty($user_data)) {
-      $provider->consumer_secret = $user_data[key($user_data)]['consumer_secret'];
-      $this->user = User::load(key($user_data));
+    $row = $this->connection->query('select * from {oauth_consumer} where consumer_key = :consumer_key',
+             array(':consumer_key' => $provider->consumer_key))->fetchObject();
+    if (!empty($row)) {
+      $provider->consumer_secret = $row->consumer_secret;
+      $this->user = User::load($row->uid);
       return OAUTH_OK;
     }
     else {

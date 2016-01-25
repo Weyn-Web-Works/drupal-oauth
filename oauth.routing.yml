@@ -10,20 +10,19 @@ oauth.user_consumer:
   defaults:
     _controller: '\Drupal\oauth\Controller\OAuthController::consumers'
   requirements:
-   _oauth_access_check: 'TRUE'
+    _permission: 'access own consumers'
 
 oauth.user_consumer_add:
-  path: '/oauth/consumer/add/{user}'
+  path: '/oauth/consumer/add'
   defaults:
     _form: '\Drupal\oauth\Form\OAuthAddConsumerForm'
     _title: 'Add an OAuth Consumer'
   requirements:
-    _oauth_access_check: 'TRUE'
-
+    _permission: 'access own consumers'
 
 oauth.user_consumer_delete:
-  path: '/oauth/consumer/delete/{user}/{key}'
+  path: '/oauth/consumer/delete/{cid}'
   defaults:
     _form: '\Drupal\oauth\Form\OAuthDeleteConsumerForm'
   requirements:
-    _oauth_access_check: 'TRUE'
+    _permission: 'access own consumers'

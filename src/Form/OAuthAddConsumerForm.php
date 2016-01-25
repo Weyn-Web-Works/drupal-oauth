@@ -7,12 +7,10 @@
 
 namespace Drupal\oauth\Form;
 
-use Drupal\Core\Cache\Cache;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\user\UserDataInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -30,23 +28,23 @@ class OAuthAddConsumerForm extends FormBase {
   protected $account;
 
   /**
-   * The user data service.
+   * The database service.
    *
-   * @var \Drupal\user\UserData
+   * @var \Drupal\Core\Database\Connection
    */
-  protected $user_data;
+  protected $connection;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
+    /** @var \Drupal\Core\Database\Connection $connection */
+    $connection = $container->get('database');
 
     /** @var \Drupal\Core\Session\AccountProxyInterface $current_user */
     $current_user = $container->get('current_user');
 
-    /** @var \Drupal\user\UserDataInterface $user_data */
-    $user_data = $container->get('user.data');
-    return new static($current_user, $user_data);
+    return new static($connection, $current_user);
   }
 
   /**
@@ -58,28 +56,23 @@ class OAuthAddConsumerForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The database service.
    * @param \Drupal\Core\Session\AccountProxyInterface $account
    *   The current user service.
-   * @param \Drupal\user\UserDataInterface $user_data
-   *  The user data service.
    */
-  public function __construct(AccountProxyInterface $account, UserDataInterface $user_data) {
+  public function __construct(Connection $connection, AccountProxyInterface $account) {
+    $this->connection = $connection;
     $this->account = $account;
-    $this->user_data = $user_data;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, AccountInterface $user = NULL) {
-
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $form['save'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Add'),
-    );
-    $form['uid'] = array(
-      '#type' => 'hidden',
-      '#value' => $user->id(),
     );
 
     return $form;
@@ -92,15 +85,17 @@ class OAuthAddConsumerForm extends FormBase {
     $consumer_key = user_password(32);
     $consumer_secret  = user_password(32);
     $key_hash = sha1($consumer_key);
-    $uid = $form_state->getValue('uid');
-    $consumer = array(
-      'consumer_secret' => $consumer_secret,
-      'key_hash' => $key_hash,
-    );
-    $this->user_data->set('oauth', $uid, $consumer_key, $consumer);
+    $this->connection->insert('oauth_consumer')
+      ->fields(array(
+        'uid' => $this->account->id(),
+        'consumer_key' => $consumer_key,
+        'consumer_secret' => $consumer_secret,
+        'key_hash' => $key_hash,
+      ))
+      ->execute();
+
     drupal_set_message($this->t('Added a new consumer.'));
-    Cache::invalidateTags(['oauth:' . $uid]);
-    $form_state->setRedirect('oauth.user_consumer', array('user' => $uid));
+    $form_state->setRedirect('oauth.user_consumer', array('user' => \Drupal::currentUser()->id()));
   }
 
 }

@@ -8,17 +8,25 @@
 namespace Drupal\oauth\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\LinkGeneratorInterface;
-use Drupal\user\UserDataInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\user\UserInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\oauth\Form\OAuthDeleteConsumerForm;
 
 /**
  * Controller routines for oauth routes.
  */
 class OAuthController extends ControllerBase implements ContainerInjectionInterface {
+
+  /**
+   * The database service.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $connection;
 
   /**
    * The URL generator service.
@@ -28,23 +36,15 @@ class OAuthController extends ControllerBase implements ContainerInjectionInterf
   protected $linkGenerator;
 
   /**
-   * The user data service.
-   *
-   * @var \Drupal\user\UserData
-   */
-  protected $user_data;
-
-  /**
    * Constructs an OauthController object.
    *
-   * @param \Drupal\user\UserDataInterface $user_data
-   *   The user data service.
-   *
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The database service.
    * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
    *   The link generator service.
    */
-  public function __construct(UserDataInterface $user_data, LinkGeneratorInterface $link_generator) {
-    $this->user_data = $user_data;
+  public function __construct(Connection $connection, LinkGeneratorInterface $link_generator) {
+    $this->connection = $connection;
     $this->linkGenerator = $link_generator;
   }
 
@@ -52,13 +52,13 @@ class OAuthController extends ControllerBase implements ContainerInjectionInterf
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    /** @var \Drupal\user\UserDataInterface $user_data */
-    $user_data = $container->get('user.data');
+    /** @var \Drupal\Core\Database\Connection $connection */
+    $connection = $container->get('database');
 
     /** @var \Drupal\Core\Utility\LinkGeneratorInterface $link_generator */
     $link_generator = $container->get('link_generator');
 
-    return new static($user_data, $link_generator);
+    return new static($connection, $link_generator);
   }
 
   /**
@@ -73,14 +73,10 @@ class OAuthController extends ControllerBase implements ContainerInjectionInterf
   public function consumers(UserInterface $user) {
     $list = array();
 
-    $list['#cache']['tags'] = array(
-      'oauth:' => $user->id(),
-    );
-
-    $list['heading']['#markup'] = $this->linkGenerator->generate($this->t('Add consumer'), Url::fromRoute('oauth.user_consumer_add', array('user' => $user->id())));
+    $list['heading']['#markup'] = $this->linkGenerator->generate($this->t('Add consumer'), Url::fromRoute('oauth.user_consumer_add'));
 
     // Get the list of consumers.
-    $result = $this->user_data->get('oauth', $user->id());
+    $result = $this->connection->query('select * from {oauth_consumer} where uid = :uid', array(':uid' => $user->id()));
 
     // Define table headers.
     $list['table'] = array(
@@ -100,18 +96,18 @@ class OAuthController extends ControllerBase implements ContainerInjectionInterf
     );
 
     // Add existing consumers to the table.
-    foreach ($result as $key => $consumer) {
+    foreach ($result as $row) {
       $list['table']['#rows'][] = array(
         'data' => array(
-          'consumer_key' => $key,
-          'consumer_secret' => $consumer['consumer_secret'],
+          'consumer_key' => $row->consumer_key,
+          'consumer_secret' => $row->consumer_secret,
           'operations' => array(
             'data' => array(
               '#type' => 'operations',
               '#links' => array(
                 'delete' => array(
                   'title' => $this->t('Delete'),
-                  'url' => Url::fromRoute('oauth.user_consumer_delete', array('user' => $user->id(), 'key' => $key)),
+                  'url' => Url::fromRoute('oauth.user_consumer_delete', array('cid' => $row->cid)),
                 ),
               ),
             ),
