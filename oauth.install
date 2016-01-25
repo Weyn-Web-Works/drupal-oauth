@@ -22,8 +22,8 @@ function oauth_requirements($phase) {
   if (!$oauth_available) {
     $requirements['oauth_pecl'] += array(
       'severity' => REQUIREMENT_ERROR,
-      'description' => t("OAuth module requires the <a href='!oauth_url' target='_blank'>PECL OAuth</a> library.",
-        array('!oauth_url' => 'http://www.php.net/manual/en/book.oauth.php')),
+      'description' => t("OAuth module requires the <a href='@oauth_url' target='_blank'>PECL OAuth</a> library.",
+        array('@oauth_url' => 'http://www.php.net/manual/en/book.oauth.php')),
     );
   }
 
