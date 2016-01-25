@@ -105,16 +105,16 @@ class OAuthDeleteConsumerForm extends ConfirmFormBase implements ContainerInject
     return $this->t('Delete');
   }
 
-  /**
-   * {@inheritdoc}
-   */
+   /**
+    * {@inheritdoc}
+    */
   public function getCancelText() {
     return $this->t('Cancel');
-  }
+   }
 
-  /**
-   * {@inheritdoc}
-   */
+   /**
+    * {@inheritdoc}
+    */
   public function getFormName() {
     return static::NAME;
   }
