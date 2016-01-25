@@ -20,7 +20,7 @@ use \OauthException;
  */
 class OAuthDrupalProvider implements AuthenticationProviderInterface {
 
- /**
+  /**
    * The user data service.
    *
    * @var \Drupal\user\UserDataInterface
@@ -111,9 +111,11 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
    *
    * @param \OAuthProvider $provider
    *   An instance of OauthProvider with the authorization request headers.
+   *
    * @return int
    *   - OAUTH_OK if the authentication was successful.
    *   - OAUTH_CONSUMER_KEY_UNKNOWN if not.
+   *
    * @see http://www.php.net/manual/en/class.oauthprovider.php
    */
   public function lookupConsumer(OAuthProvider $provider) {

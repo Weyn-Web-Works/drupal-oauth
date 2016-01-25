@@ -91,9 +91,10 @@ class OAuthTest extends WebTestBase {
     $entity_values = array(
       'name' => 'Some name',
       'user_id' => 1,
-      'field_test_text' => array(0 => array(
-        'value' => 'Some value',
-        'format' => 'plain_text',
+      'field_test_text' => array(
+        0 => array(
+          'value' => 'Some value',
+          'format' => 'plain_text',
       )),
     );
     $entity = entity_create($entity_type, $entity_values);
