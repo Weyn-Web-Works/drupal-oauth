@@ -14,24 +14,17 @@ function oauth_requirements($phase) {
   $requirements = array();
   $oauth_available = class_exists('\\OauthProvider');
 
-  if ($oauth_available) {
-    $requirements['oauth_pecl'] = array(
-      'title' => t('OAuth'),
-      'value' => t('OAuth PECL library installed'),
-    );
-  }
-  else {
-    $requirements['oauth_pecl'] = array(
-      'title' => t('OAuth'),
+  $requirements['oauth_pecl'] = array(
+    'title' => t('OAuth'),
+    'value' => $oauth_available ? t('OAuth PECL library installed') : t('OAuth PECL library not installed'),
+  );
+
+  if (!$oauth_available) {
+    $requirements['oauth_pecl'] += array(
       'severity' => REQUIREMENT_ERROR,
       'description' => t("OAuth module requires the <a href='@oauth_url' target='_blank'>PECL OAuth</a> library.",
         array('@oauth_url' => 'http://www.php.net/manual/en/book.oauth.php')),
     );
-    if ($phase == 'runtime') {
-      $requirements['oauth_pecl'] += array(
-        'value' => t('OAuth PECL library not installed'),
-      );
-    }
   }
 
   return $requirements;
