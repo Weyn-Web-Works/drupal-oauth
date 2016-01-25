@@ -7,11 +7,14 @@
 
 namespace Drupal\oauth\Form;
 
-use Drupal\Core\Database\Connection;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\user\UserDataInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -20,6 +23,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class OAuthDeleteConsumerForm extends ConfirmFormBase implements ContainerInjectionInterface {
 
   const NAME = 'oauth_delete_consumer_form';
+
+  /**
+   * The current user service.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $account;
+
+  /**
+   * The user data service.
+   *
+   * @var \Drupal\user\UserData
+   */
+  protected $user_data;
 
   /**
    * Factory.
@@ -31,19 +48,26 @@ class OAuthDeleteConsumerForm extends ConfirmFormBase implements ContainerInject
    *   The form instance.
    */
   public static function create(ContainerInterface $container) {
-    /** @var \Drupal\Core\Database\Connection $database */
-    $database = $container->get('database');
-    return new static($database);
+
+    /** @var \Drupal\Core\Session\AccountProxyInterface $current_user */
+    $current_user = $container->get('current_user');
+
+    /** @var \Drupal\user\UserDataInterface $user_data */
+    $user_data = $container->get('user.data');
+
+    return new static($current_user, $user_data);
   }
 
   /**
    * Constructor.
    *
-   * @param \Drupal\Core\Database\Connection $connection
-   *   The database service.
+   * @param \Drupal\Core\Session\AccountProxyInterface
+   *
+   * @param \Drupal\user\UserDataInterface
    */
-  public function __construct(Connection $connection) {
-    $this->connection = $connection;
+  public function __construct(AccountProxyInterface $account, UserDataInterface $user_data) {
+    $this->account = $account;
+    $this->user_data = $user_data;
   }
 
   /**
@@ -98,10 +122,15 @@ class OAuthDeleteConsumerForm extends ConfirmFormBase implements ContainerInject
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $cid = NULL) {
-    $form['cid'] = array(
+  public function buildForm(array $form, FormStateInterface $form_state, AccountInterface $user = NULL, $key = NULL) {
+    $form['key'] = array(
       '#type' => 'hidden',
-      '#value' => $cid,
+      '#value' => $key,
+    );
+
+    $form['uid'] = array(
+      '#type' => 'hidden',
+      '#value' => $user->id()
     );
 
     $form = parent::buildForm($form, $form_state);
@@ -114,12 +143,12 @@ class OAuthDeleteConsumerForm extends ConfirmFormBase implements ContainerInject
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-    $cid = $values['cid'];
-    $this->connection->delete('oauth_consumer')
-      ->condition('cid', $cid)
-      ->execute();
+    $key = $values['key'];
+    $uid = $values['uid'];
+    $this->user_data->delete('oauth', $uid, $key);
     drupal_set_message($this->t('OAuth consumer deleted.'));
-    $form_state->setRedirect('oauth.user_consumer', ['user' => \Drupal::currentUser()->id()]);
+    Cache::invalidateTags(['oauth:' . $uid]);
+    $form_state->setRedirect('oauth.user_consumer', array('user' => $form_state->getValue('uid')));
   }
 
 }

@@ -7,6 +7,7 @@
 namespace Drupal\oauth\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\user\USerData;
 
 /**
  * Tests oauth functionality.
@@ -38,12 +39,31 @@ class OAuthTest extends WebTestBase {
     $this->assertResponse(200);
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add', array(), 'Add');
+    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
     $this->assertText(t('Added a new consumer.'));
 
     // Delete the set of consumer keys.
-    $consumer = db_query('select * from {oauth_consumer} where uid = :uid', array(':uid' => $account->id()))->fetchObject();
-    $this->drupalPostForm('oauth/consumer/delete/' . $consumer->cid, array(), 'Delete');
+    $user_data = \Drupal::service('user.data')->get('oauth', $account->id());
+    $this->drupalPostForm('oauth/consumer/delete/' . $account->id() . '/' . key($user_data), array(), 'Delete');
+    $this->assertText(t('OAuth consumer deleted.'));
+
+    $this->drupalLogout();
+
+    // Test administer consumer permissions
+    $admin_account = $this->drupalCreateUser(array('administer consumers'));
+    $this->drupalLogin($admin_account);
+
+    $this->drupalGet('user/' . $account->id() . '/oauth/consumer');
+    $this->assertResponse(200);
+
+    // Generate a set of consumer keys.
+    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
+    $this->assertText(t('Added a new consumer.'));
+
+    // Delete the set of consumer keys.
+    $user_data = \Drupal::service('user.data')->get('oauth', $account->id());
+
+    $this->drupalPostForm('oauth/consumer/delete/' . $account->id() . '/' . key($user_data), array(), 'Delete');
     $this->assertText(t('OAuth consumer deleted.'));
 
     $this->drupalLogout();
@@ -90,13 +110,13 @@ class OAuthTest extends WebTestBase {
     $this->drupalLogin($account);
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add', array(), 'Add');
-    $consumer = db_query('select * from {oauth_consumer} where uid = :uid', array(':uid' => $account->id()))->fetchObject();
-
+    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
+    // Get the consumer we just generated for the new user.
+    $user_data = \Drupal::service('user.data')->get('oauth', $account->id());
     // Now send an authenticated request to read the entity through REST.
     $url = $entity->urlInfo()->setRouteParameter('_format', $format);
     $endpoint = $url->setAbsolute()->toString();
-    $oauth = new \OAuth($consumer->consumer_key, $consumer->consumer_secret);
+    $oauth = new \OAuth(key($user_data), $user_data[key($user_data)]['consumer_secret']);
     $oauth_header = $oauth->getRequestHeader('GET', $endpoint);
     $out = $this->curlExec(
       array(
@@ -123,13 +143,13 @@ class OAuthTest extends WebTestBase {
     $this->drupalLogin($account);
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add', array(), 'Add');
+    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
 
     // Delete the user.
     $uid = $account->id();
     $account->delete();
     // Check that its consumers were deleted.
-    $consumer = db_query('select cid FROM {oauth_consumer} WHERE uid = :uid', array(':uid' => $uid))->fetchField();
+    $consumer = \Drupal::service('user.data')->get('oauth', $uid);
     $this->assertFalse($consumer, t('Consumer keys were deleted on user deletion.'));
   }
 
