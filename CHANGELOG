@@ -1,4 +1,9 @@
-OAuth 6.x-3.0-xxx, xxxx-xx-xx
+OAuth 6.x-3.0, 2017-01-25
+------------------------------
+Add missing oauth_callback_confirmed parameter
+#1238752 by aaron1234nz | Ben Coleman | John Franklin | fivefrank | aaron1234nz: Postgres compatability.
+
+OAuth 6.x-3.0-beta6
 ------------------------------
 #1155760 by deviantintegral, voxpelli: Catching more exceptions, eg. when the consumer key is incorrect
 #1199360 by Sepehr Lajevardi, voxpelli: Fixed E_NOTICE in OAuth request context loader
