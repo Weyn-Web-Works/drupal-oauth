@@ -1,4 +1,4 @@
-name: OAuth
+name: OAuth 1.0
 type: module
 description: "Provides OAuth 1.0a server authentication"
 package: Web services
