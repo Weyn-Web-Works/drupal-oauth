@@ -220,7 +220,7 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
     $ok = openssl_sign($base_string, $signature, $privatekeyid);
 
     // Release the key resource
-    openssl_free_key($privatekeyid);
+    unset($privatekeyid);
 
     return base64_encode($signature);
   }
@@ -240,7 +240,7 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
     $ok = openssl_verify($base_string, $decoded_sig, $publickeyid);
 
     // Release the key resource
-    openssl_free_key($publickeyid);
+    unset($publickeyid);
 
     return $ok == 1;
   }
