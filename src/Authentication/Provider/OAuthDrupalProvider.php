@@ -7,12 +7,12 @@
 
 namespace Drupal\oauth\Authentication\Provider;
 
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Drupal\Core\Authentication\AuthenticationProviderInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserDataInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use \OauthProvider;
 use \OauthException;
 /**
@@ -99,7 +99,7 @@ class OAuthDrupalProvider implements AuthenticationProviderInterface {
   /**
    * {@inheritdoc}
    */
-  public function handleException(GetResponseForExceptionEvent $event) {
+  public function handleException(ExceptionEvent $event) {
     return FALSE;
   }
 

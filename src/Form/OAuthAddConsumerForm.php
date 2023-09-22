@@ -89,8 +89,8 @@ class OAuthAddConsumerForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $consumer_key = user_password(32);
-    $consumer_secret  = user_password(32);
+    $consumer_key = \Drupal::service('password_generator')->generate(32);
+    $consumer_secret  = \Drupal::service('password_generator')->generate(32);
     $key_hash = sha1($consumer_key);
     $uid = $form_state->getValue('uid');
     $consumer = array(

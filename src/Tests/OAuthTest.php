@@ -21,7 +21,7 @@ class OAuthTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = array('node', 'entity_test', 'oauth', 'rest');
+  protected static $modules = array('node', 'entity_test', 'oauth', 'rest');
 
   /**
    * Tests consumer generation and deletion.
@@ -36,16 +36,18 @@ class OAuthTest extends BrowserTestBase {
 
     // Check that OAuth menu tab is visible at user profile.
     $this->drupalGet('user/' . $account->id() . '/oauth/consumer');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->drupalGet('oauth/consumer/add/' . $account->id());
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
-    $this->assertText(t('Added a new consumer.'));
+    $this->submitForm(array(), 'Add');
+    $this->assertSession()->pageTextContains(t('Added a new consumer.'));
 
     // Delete the set of consumer keys.
     $user_data = \Drupal::service('user.data')->get('oauth', $account->id());
-    $this->drupalPostForm('oauth/consumer/delete/' . $account->id() . '/' . key($user_data), array(), 'Delete');
-    $this->assertText(t('OAuth consumer deleted.'));
+    $this->drupalGet('oauth/consumer/delete/' . $account->id() . '/' . key($user_data));
+    $this->submitForm(array(), 'Delete');
+    $this->assertSession()->pageTextContains(t('OAuth consumer deleted.'));
 
     $this->drupalLogout();
 
@@ -54,17 +56,19 @@ class OAuthTest extends BrowserTestBase {
     $this->drupalLogin($admin_account);
 
     $this->drupalGet('user/' . $account->id() . '/oauth/consumer');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->drupalGet('oauth/consumer/add/' . $account->id());
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
-    $this->assertText(t('Added a new consumer.'));
+    $this->submitForm(array(), 'Add');
+    $this->assertSession()->pageTextContains(t('Added a new consumer.'));
 
     // Delete the set of consumer keys.
     $user_data = \Drupal::service('user.data')->get('oauth', $account->id());
+    $this->drupalGet('oauth/consumer/delete/' . $account->id() . '/' . key($user_data));
 
-    $this->drupalPostForm('oauth/consumer/delete/' . $account->id() . '/' . key($user_data), array(), 'Delete');
-    $this->assertText(t('OAuth consumer deleted.'));
+    $this->submitForm(array(), 'Delete');
+    $this->assertSession()->pageTextContains(t('OAuth consumer deleted.'));
 
     $this->drupalLogout();
   }
@@ -109,9 +113,10 @@ class OAuthTest extends BrowserTestBase {
     );
     $account = $this->drupalCreateUser($permissions);
     $this->drupalLogin($account);
+    $this->drupalGet('oauth/consumer/add/' . $account->id());
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
+    $this->submitForm(array(), 'Add');
     // Get the consumer we just generated for the new user.
     $user_data = \Drupal::service('user.data')->get('oauth', $account->id());
     // Now send an authenticated request to read the entity through REST.
@@ -127,8 +132,8 @@ class OAuthTest extends BrowserTestBase {
         CURLOPT_HTTPHEADER => array('Authorization: ' . $oauth_header),
       )
     );
-    $this->verbose('GET request to: ' . $endpoint . '<hr />' . $out);
-    $this->assertResponse('200', 'HTTP response code is 200 for successfully authenticated request.');
+    dump('GET request to: ' . $endpoint . '<hr />' . $out);
+    $this->assertSession()->statusCodeEquals('200', 'HTTP response code is 200 for successfully authenticated request.');
     $this->curlClose();
   }
 
@@ -142,9 +147,10 @@ class OAuthTest extends BrowserTestBase {
 
     // Initiate user session.
     $this->drupalLogin($account);
+    $this->drupalGet('oauth/consumer/add/' . $account->id());
 
     // Generate a set of consumer keys.
-    $this->drupalPostForm('oauth/consumer/add/' . $account->id(), array(), 'Add');
+    $this->submitForm(array(), 'Add');
 
     // Delete the user.
     $uid = $account->id();
