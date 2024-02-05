@@ -18,6 +18,15 @@ For OAuth 2.0, install the Oauth 2.0 module instead of this one.
 
 [OAuth 2.0](https://www.drupal.org/project/simple_oauth)
 
+- For a full description of the module, visit the [project
+  page](https://drupal.org/project/oauth).
+
+- For a full description of the module, visit the
+[project page](https://www.drupal.org/project/oauth).
+
+- Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/oauth).
+
 
 ## Requirements
 
