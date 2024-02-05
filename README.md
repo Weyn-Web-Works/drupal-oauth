@@ -1,13 +1,4 @@
-## Contents on this file
-
-- Introduction
-- Requirements
-- Installation
-- Configuration
-- Maintainers
-
-
-## Introduction
+# OAuth 1.0
 
 This module implements the OAuth 1.0 standard for use with Drupal and acts as a
 support module for other modules that wish to use OAuth.
@@ -26,6 +17,14 @@ For OAuth 2.0, install the Oauth 2.0 module instead of this one.
 
 - Submit bug reports and feature suggestions, or track changes in the
 [issue queue](https://www.drupal.org/project/issues/oauth).
+
+
+## Table of contents
+
+- Requirements
+- Installation
+- Configuration
+- Maintainers
 
 
 ## Requirements
