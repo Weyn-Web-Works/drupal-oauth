@@ -2,7 +2,7 @@ name: OAuth 1.0
 type: module
 description: "Provides OAuth 1.0a server authentication"
 package: Web services
-core_version_requirement: ^8 || ^9 || ^10
+core_version_requirement: ^8 || ^9 || ^10 || ^11
 dependencies:
   - drupal:system (>=8.5.0)
 configure: oauth.admin_form
